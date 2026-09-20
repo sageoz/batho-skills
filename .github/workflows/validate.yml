@@ -1,0 +1,161 @@
+name: validate
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - '.claude-plugin/**'
+      - '.agents/**'
+      - 'plugin.json'
+      - 'mcp.json'
+      - '.mcp.json'
+      - 'gemini-extension.json'
+      - 'agent-paths.json'
+      - 'install.sh'
+      - 'install.ps1'
+      - 'hooks/**'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JSON sanity — all manifests parse
+        run: |
+          set -e
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json \
+                   .agents/plugins/marketplace.json plugin.json mcp.json .mcp.json \
+                   gemini-extension.json agent-paths.json hooks/hooks.json server.json; do
+            [ -f "$f" ] && jq empty "$f" && echo "ok: $f"
+          done
+      - name: Version lockstep — plugin.json == marketplace.json
+        run: |
+          set -e
+          PV=$(jq -r .version .claude-plugin/plugin.json)
+          MV=$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)
+          AMV=$(jq -r '.plugins[0].version' .agents/plugins/marketplace.json)
+          PPV=$(jq -r .version plugin.json)
+          GV=$(jq -r .version gemini-extension.json)
+          echo "plugin=$PV marketplace=$MV agents-plugins=$AMV root-plugin=$PPV gemini=$GV"
+          [ "$PV" = "$MV" ] && [ "$PV" = "$AMV" ] && [ "$PV" = "$PPV" ] && [ "$PV" = "$GV" ] \
+            || { echo "::error::version drift across manifests"; exit 1; }
+      - name: Claude plugin validate
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate --strict .
+
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: skills-ref spec validation (per skill)
+        run: |
+          set -e
+          for d in skills/*/; do
+            echo "== $d"
+            uvx --from git+https://github.com/agentskills/agentskills#subdirectory=skills-ref \
+              skills-ref validate "$d" || exit 1
+          done
+      - name: SKILL.md sanity — name matches dir, size cap
+        run: |
+          set -e
+          for d in skills/*/; do
+            name=$(basename "$d")
+            fname=$(sed -n 's/^name: *//p' "$d/SKILL.md" | head -1 | tr -d ' ')
+            [ "$fname" = "$name" ] || { echo "::error::$d name field '$fname' != dir '$name'"; exit 1; }
+            lines=$(wc -l < "$d/SKILL.md")
+            [ "$lines" -le 500 ] || echo "::warning::$d SKILL.md is $lines lines (>500)"
+          done
+      - name: Broken reference check — referenced files exist
+        run: |
+          set -e
+          for d in skills/*/; do
+            for ref in $(grep -oE '(references|scripts)/[A-Za-z0-9._-]+' "$d/SKILL.md" | sort -u); do
+              [ -f "$d$ref" ] || { echo "::error::$d references missing file: $ref"; exit 1; }
+            done
+          done
+      - name: agent-paths.json parity — every table row in install.sh maps to a known agent
+        run: |
+          set -e
+          python3 - <<'PY'
+          import json, re, sys
+          agents = set(json.load(open('agent-paths.json'))['agents'])
+          table = re.search(r"AGENT_TABLE='([^']+)'", open('install.sh').read()).group(1)
+          ids = {l.split('|')[0] for l in table.strip().splitlines() if l.strip()}
+          missing = agents - ids; extra = ids - agents
+          if missing or extra:
+              sys.exit(f"install.sh table drift — missing:{missing} extra:{extra}")
+          print(f"parity ok: {len(ids)} agents")
+          PY
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: gitleaks (OSS binary — no action license required)
+        run: |
+          GL_VER=8.30.1
+          cd /tmp
+          curl -sSfL -o "gitleaks_${GL_VER}_linux_x64.tar.gz" "https://github.com/gitleaks/gitleaks/releases/download/v${GL_VER}/gitleaks_${GL_VER}_linux_x64.tar.gz"
+          curl -sSfL -o gitleaks_checksums.txt "https://github.com/gitleaks/gitleaks/releases/download/v${GL_VER}/gitleaks_${GL_VER}_checksums.txt"
+          grep "gitleaks_${GL_VER}_linux_x64.tar.gz" gitleaks_checksums.txt | sha256sum -c -
+          tar -xzf "gitleaks_${GL_VER}_linux_x64.tar.gz" -C /usr/local/bin gitleaks
+          gitleaks detect --source "$GITHUB_WORKSPACE" --redact --no-banner
+      - name: shellcheck installers
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck -s sh install.sh install-batho.sh
+      - name: install.ps1 parses
+        run: |
+          sudo apt-get install -y powershell || true
+          if command -v pwsh >/dev/null; then
+            for f in install.ps1 install-batho.ps1; do
+              pwsh -NoProfile -Command "\$ErrorActionPreference='Stop'; \$null = [scriptblock]::Create((Get-Content -Raw $f)); Write-Host '$f parse ok'"
+            done
+          fi
+
+  installer-matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: build fixture tarball + local file server
+        shell: bash
+        run: |
+          mkdir -p pkg fixture/latest/download
+          cp -R skills pkg/skills
+          tar -czf fixture/latest/download/batho-skills.tar.gz -C pkg skills
+          # real zip — Expand-Archive rejects a gzip tarball named .zip
+          (cd pkg && zip -qr ../fixture/latest/download/batho-skills.zip skills || python3 -m zipfile -c ../fixture/latest/download/batho-skills.zip skills)
+          (cd fixture/latest/download && { sha256sum batho-skills.tar.gz batho-skills.zip || shasum -a 256 batho-skills.tar.gz batho-skills.zip; } > sha256sums.txt)
+          (cd fixture && python3 -m http.server 8811 &) && sleep 1
+      - name: unix install smoke (fake home + markers)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          sed 's/--proto .=https. --tlsv1.2 //g; s/--https-only --secure-protocol=TLSv1_2 //g' install.sh > install-test.sh
+          export HOME=$RUNNER_TEMP/fakehome
+          mkdir -p "$HOME/.claude" "$HOME/.kiro"
+          BATHO_BASE_URL=http://localhost:8811 sh install-test.sh
+          test -d "$HOME/.agents/skills/batho" && test -d "$HOME/.claude/skills/batho" && test -d "$HOME/.kiro/skills/batho"
+          BATHO_BASE_URL=http://localhost:8811 sh install-test.sh --remove
+          test ! -e "$HOME/.agents/skills/batho" && test ! -e "$HOME/.claude/skills/batho"
+      - name: windows install smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:USERPROFILE_BAK=$env:USERPROFILE; $env:USERPROFILE="$env:RUNNER_TEMP\fakehome"
+          New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude","$env:USERPROFILE\.kiro" | Out-Null
+          $env:BATHO_BASE_URL="http://localhost:8811"
+          $env:BATHO_COPY="1"
+          powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
+          if (-not (Test-Path "$env:USERPROFILE\.agents\skills\batho")) { throw "canonical install failed" }
+          if (-not (Test-Path "$env:USERPROFILE\.claude\skills\batho")) { throw "claude mirror failed" }
+          $env:USERPROFILE=$env:USERPROFILE_BAK

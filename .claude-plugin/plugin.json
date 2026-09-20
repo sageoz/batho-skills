@@ -1,0 +1,19 @@
+{
+  "name": "batho",
+  "description": "Deterministic code-graph intelligence: route structural questions through the Batho MCP instead of grep/read loops. Includes the full SDLC skill pack: batho (router + artifact lifecycle), batho-setup, batho-specs (grounded specifications), batho-execute (spec-driven implementation), batho-review (graph-verified reviews).",
+  "version": "1.0.0",
+  "author": {
+    "name": "Sageoz"
+  },
+  "repository": "https://github.com/sageoz/batho-skills",
+  "keywords": [
+    "code-graph",
+    "code-intelligence",
+    "mcp",
+    "spec-driven-development",
+    "code-search",
+    "impact-analysis",
+    "tree-sitter"
+  ],
+  "license": "MIT"
+}

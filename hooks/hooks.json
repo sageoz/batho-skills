@@ -1,0 +1,16 @@
+{
+  "_comment": "OPTIONAL nudge hooks — DISABLED BY DEFAULT. Enable by moving this file to your Claude Code settings hooks section. The PreToolUse matcher targets Claude Code's dedicated Grep tool (not Bash grep) — matcher drift is a known failure mode; verify matcher names against your Claude Code version before enabling.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[batho nudge] For structural questions (who calls, dependencies, impact), prefer Batho graph tools (search_entities, get_entity, trace_path) before grep. Exact-string search is fine with grep.' >&2; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

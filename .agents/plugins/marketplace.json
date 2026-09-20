@@ -1,0 +1,30 @@
+{
+  "name": "batho",
+  "description": "Batho code-graph intelligence skills — deterministic structural answers for coding agents via the Batho MCP.",
+  "owner": {
+    "name": "Sageoz"
+  },
+  "metadata": {
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "batho",
+      "source": "./",
+      "description": "Deterministic code-graph intelligence for coding agents: batho (router + artifact lifecycle), batho-setup (install + MCP registration), batho-specs (grounded specs), batho-execute (spec-driven implementation), batho-review (graph-verified reviews).",
+      "version": "1.0.0",
+      "author": {
+        "name": "Sageoz"
+      },
+      "repository": "https://github.com/sageoz/batho-skills",
+      "license": "MIT",
+      "skills": [
+        "./skills/batho",
+        "./skills/batho-setup",
+        "./skills/batho-specs",
+        "./skills/batho-execute",
+        "./skills/batho-review"
+      ]
+    }
+  ]
+}

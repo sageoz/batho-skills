@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "io.github.sageoz/batho",
+  "title": "Batho — Code Graph Intelligence",
+  "description": "Deterministic code-graph intelligence for coding agents: structural queries (callers, dependencies, impact analysis, path tracing) served from a precomputed graph artifact instead of grep/read loops.",
+  "version": "1.4.2",
+  "repository": {
+    "url": "https://github.com/sageoz/Batho",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "batho",
+      "version": "1.4.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "uvx",
+      "runtimeArguments": ["mcp"]
+    }
+  ],
+  "_meta": {
+    "org.sageoz/skills-repo": "https://github.com/sageoz/batho-skills"
+  }
+}

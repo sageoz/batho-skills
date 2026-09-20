@@ -1,0 +1,11 @@
+{
+  "name": "batho",
+  "version": "1.0.0",
+  "description": "Batho code-graph intelligence: deterministic structural answers for coding agents via the Batho MCP server and skill pack.",
+  "mcpServers": {
+    "batho": {
+      "command": "batho",
+      "args": ["mcp"]
+    }
+  }
+}

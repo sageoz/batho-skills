@@ -1,0 +1,202 @@
+{
+  "_schema": {
+    "version": 1,
+    "description": "Canonical per-agent skill-directory table for the Batho skill pack installers. Consumed by install.sh (embedded rendering), install.ps1 (ConvertFrom-Json), and skills/batho-setup/scripts/install_pack.py. Install strategy: always write canonical <scope>/.agents/skills; for agents with reads_agents_dir=false also mirror into their native dirs when detected (marker exists) or forced via --agent/--all.",
+    "fields": {
+      "reads_agents_dir": "agent discovers <scope>/.agents/skills natively — no mirror required",
+      "detect": "markers whose existence means the agent is installed (global dirs under $HOME; project dirs relative to project root)",
+      "project_dirs": "native skill dirs relative to project root (written when detected/forced; informational when reads_agents_dir=true)",
+      "global_dirs": "native skill dirs under $HOME / %USERPROFILE% (posix form; windows override where noted)",
+      "windows_global_dirs": "Windows-specific global paths (env-var form; substituted at runtime)"
+    }
+  },
+  "pack_skills": ["batho", "batho-setup", "batho-specs", "batho-execute", "batho-review"],
+  "canonical": {
+    "project": ".agents/skills",
+    "global_posix": "~/.agents/skills",
+    "global_windows": "%USERPROFILE%\\.agents\\skills"
+  },
+  "agents": {
+    "claude-code": {
+      "display": "Claude Code",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.claude"], "project_dirs": [".claude"], "bins": ["claude"]},
+      "project_dirs": [".claude/skills"],
+      "global_dirs": ["~/.claude/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.claude\\skills"]
+    },
+    "cursor": {
+      "display": "Cursor",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.cursor"], "project_dirs": [".cursor"], "bins": ["cursor"]},
+      "project_dirs": [".cursor/skills"],
+      "global_dirs": ["~/.cursor/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.cursor\\skills"]
+    },
+    "copilot": {
+      "display": "GitHub Copilot",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.copilot"], "project_dirs": [".github"], "bins": ["copilot"]},
+      "project_dirs": [".github/skills"],
+      "global_dirs": ["~/.copilot/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.copilot\\skills"]
+    },
+    "codex": {
+      "display": "OpenAI Codex",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.codex"], "project_dirs": [".codex"], "bins": ["codex"]},
+      "project_dirs": [".codex/skills"],
+      "global_dirs": ["~/.codex/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.codex\\skills"],
+      "notes": "~/.codex/skills deprecated but scanned; canonical user dir is ~/.agents/skills; /etc/codex/skills is admin scope (not written by installers)"
+    },
+    "gemini": {
+      "display": "Gemini CLI",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.gemini"], "project_dirs": [".gemini"], "bins": ["gemini"]},
+      "project_dirs": [".gemini/skills"],
+      "global_dirs": ["~/.gemini/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.gemini\\skills"]
+    },
+    "opencode": {
+      "display": "OpenCode",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.config/opencode"], "project_dirs": [".opencode"], "bins": ["opencode"]},
+      "project_dirs": [".opencode/skills"],
+      "global_dirs": ["~/.config/opencode/skills"],
+      "windows_global_dirs": ["%APPDATA%\\opencode\\skills"]
+    },
+    "windsurf": {
+      "display": "Windsurf / Devin Desktop",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.codeium"], "project_dirs": [".windsurf"], "bins": ["windsurf"]},
+      "project_dirs": [".windsurf/skills"],
+      "global_dirs": ["~/.codeium/windsurf/skills"],
+      "windows_global_dirs": ["%APPDATA%\\Windsurf\\skills"]
+    },
+    "devin": {
+      "display": "Devin CLI",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.config/devin"], "project_dirs": [".devin"], "bins": ["devin"]},
+      "project_dirs": [".devin/skills"],
+      "global_dirs": ["~/.config/devin/skills"],
+      "windows_global_dirs": ["%APPDATA%\\devin\\skills"]
+    },
+    "amp": {
+      "display": "Amp",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.config/amp"], "bins": ["amp"]},
+      "project_dirs": [],
+      "global_dirs": ["~/.config/agents/skills", "~/.config/amp/skills"],
+      "windows_global_dirs": ["%APPDATA%\\amp\\skills"]
+    },
+    "roo": {
+      "display": "Roo Code",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.roo"], "project_dirs": [".roo"], "bins": []},
+      "project_dirs": [".roo/skills"],
+      "global_dirs": ["~/.roo/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.roo\\skills"]
+    },
+    "cline": {
+      "display": "Cline",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.cline"], "project_dirs": [".cline"], "bins": []},
+      "project_dirs": [".cline/skills"],
+      "global_dirs": ["~/.cline/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.cline\\skills"]
+    },
+    "zed": {
+      "display": "Zed",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.zed"], "project_dirs": [".zed"], "bins": ["zed"]},
+      "project_dirs": [],
+      "global_dirs": [],
+      "windows_global_dirs": [],
+      "notes": "Reads ONLY .agents/skills at project and ~ scope — canonical write covers it; nothing to mirror."
+    },
+    "kiro": {
+      "display": "Kiro",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.kiro"], "project_dirs": [".kiro"], "bins": ["kiro"]},
+      "project_dirs": [".kiro/skills"],
+      "global_dirs": ["~/.kiro/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.kiro\\skills"]
+    },
+    "factory": {
+      "display": "Factory Droid",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.factory"], "project_dirs": [".factory"], "bins": ["droid"]},
+      "project_dirs": [".factory/skills"],
+      "global_dirs": ["~/.factory/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.factory\\skills"]
+    },
+    "trae": {
+      "display": "Trae IDE",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.trae"], "project_dirs": [".trae"], "bins": []},
+      "project_dirs": [".trae/skills"],
+      "global_dirs": ["~/.trae/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.trae\\skills"]
+    },
+    "antigravity": {
+      "display": "Google Antigravity",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.gemini/antigravity"], "project_dirs": [], "bins": ["agy"]},
+      "project_dirs": [".agent/skills"],
+      "global_dirs": ["~/.gemini/antigravity/skills", "~/.gemini/config/skills", "~/.gemini/antigravity-cli/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.gemini\\antigravity\\skills"],
+      "notes": "Official docs conflict on global dir — write both antigravity/ and config/ variants."
+    },
+    "junie": {
+      "display": "JetBrains Junie",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.junie"], "project_dirs": [".junie"], "bins": ["junie"]},
+      "project_dirs": [".junie/skills"],
+      "global_dirs": ["~/.junie/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.junie\\skills"],
+      "notes": "IDE reads .junie/skills; Junie CLI reads .agents/skills natively."
+    },
+    "goose": {
+      "display": "Goose",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.config/goose"], "project_dirs": [".goose"], "bins": ["goose"]},
+      "project_dirs": [".goose/skills"],
+      "global_dirs": ["~/.config/goose/skills"],
+      "windows_global_dirs": ["%APPDATA%\\Block\\goose\\skills"]
+    },
+    "warp": {
+      "display": "Warp",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.warp"], "project_dirs": [".warp"], "bins": []},
+      "project_dirs": [".warp/skills"],
+      "global_dirs": ["~/.warp/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.warp\\skills"],
+      "notes": "Widest scanner — reads .agents/skills plus 9 other dirs; canonical write suffices."
+    },
+    "pi": {
+      "display": "Pi",
+      "reads_agents_dir": true,
+      "detect": {"global_dirs": ["~/.pi"], "project_dirs": [".pi"], "bins": ["pi"]},
+      "project_dirs": [".pi/skills"],
+      "global_dirs": ["~/.pi/agent/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.pi\\agent\\skills"]
+    },
+    "continue": {
+      "display": "Continue",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.continue"], "project_dirs": [".continue"], "bins": []},
+      "project_dirs": [".continue/skills"],
+      "global_dirs": ["~/.continue/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.continue\\skills"]
+    },
+    "kilocode": {
+      "display": "Kilo Code",
+      "reads_agents_dir": false,
+      "detect": {"global_dirs": ["~/.kilocode"], "project_dirs": [".kilocode"], "bins": []},
+      "project_dirs": [".kilocode/skills"],
+      "global_dirs": ["~/.kilocode/skills"],
+      "windows_global_dirs": ["%USERPROFILE%\\.kilocode\\skills"]
+    }
+  }
+}

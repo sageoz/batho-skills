@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/plugin.json",
+  "name": "batho",
+  "version": "1.0.0",
+  "description": "Deterministic code-graph intelligence for coding agents: route structural questions through the Batho MCP instead of grep/read loops. Ships the full SDLC skill pack plus the batho MCP server registration.",
+  "author": {
+    "name": "Sageoz"
+  },
+  "repository": "https://github.com/sageoz/batho-skills",
+  "license": "MIT",
+  "keywords": [
+    "code-graph",
+    "code-intelligence",
+    "mcp",
+    "spec-driven-development",
+    "code-search",
+    "impact-analysis",
+    "tree-sitter"
+  ],
+  "skills": [
+    "./skills/batho",
+    "./skills/batho-setup",
+    "./skills/batho-specs",
+    "./skills/batho-execute",
+    "./skills/batho-review"
+  ]
+}

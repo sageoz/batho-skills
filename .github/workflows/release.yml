@@ -1,0 +1,40 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  id-token: write   # Sigstore attestation via GitHub OIDC
+  attestations: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: build deterministic artifacts
+        run: node scripts/build-release.mjs "${{ github.event.release.tag_name }}"
+      - name: lint rendered installer
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck -s sh dist/install.sh
+      - name: upload assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          cd dist
+          # version-free aliases keep /releases/latest/download/ usable
+          VER="${GITHUB_REF_NAME#v}"
+          cp "batho-skills-${VER}.tar.gz" batho-skills.tar.gz
+          cp "batho-skills-${VER}.zip" batho-skills.zip
+          sha256sum batho-skills.tar.gz batho-skills.zip >> sha256sums.txt
+          gh release upload "${{ github.event.release.tag_name }}" ./* --clobber
+      - name: attest artifacts
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/*
