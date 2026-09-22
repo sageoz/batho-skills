@@ -1,10 +1,8 @@
 <div align="center">
 
-# batho-skills
+# Batho-Skill-Pack
 
-**Graph-grounded skills for the [Batho](https://github.com/sageoz/Batho) code graph**
-
-Install once — every agent gets a spec → execute → review loop where every claim is grounded in your codebase.
+**Agent skills for [Batho](https://github.com/sageoz/Batho)**
 
 [![validate](https://github.com/sageoz/batho-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/sageoz/batho-skills/actions/workflows/validate.yml)
 [![release](https://img.shields.io/github/v/release/sageoz/batho-skills)](https://github.com/sageoz/batho-skills/releases)
@@ -16,26 +14,59 @@ Install once — every agent gets a spec → execute → review loop where every
 
 ---
 
-## Why batho-skills?
+## Features
 
-[Batho](https://github.com/sageoz/Batho) builds a code graph for your workspace — entities, relationships, call paths. This pack teaches your coding agent to drive it, in the open [Agent Skills](https://agentskills.io) format:
+[Batho](https://github.com/sageoz/Batho) indexes your codebase into a **knowledge graph** and **Batho-Skill-Pack** guides your coding agent to query it through MCP. 
 
-- **Works everywhere** — one install targets 22 agents (Claude Code, Cursor, Codex, Copilot, Gemini CLI, Windsurf, Devin, …) via per-agent mirrors.
-- **Grounded answers** — "who calls this?", "what breaks if I change X?" come from the graph, not grep.
-- **Spec → execute → review** — a closed loop where every spec claim cites graph entities and every review verifies against them.
-- **Supply-chain safe** — deterministic, checksummed, SLSA-attested release artifacts.
+> "Graph grounded answers instead of grepping and guessing."
+
+### Core capabilities
+
+| Capability | Description |
+|---|---|
+| **Code graph** | Tree-sitter-parsed graph of every function, class, module, plus calls, imports, inheritance, and overrides |
+| **MCP server** | Structural queries (`get_entity`, `trace_path`, `search_entities`) served from the graph artifact |
+| **22-agent distribution** | Self-installing SKILL.md format with per-agent mirrors |
+| **Full SDLC loop** | Specs → execute → review, graph-grounded at every stage |
+
+### The SDLC loop
+
+| Stage | Skill | What happens |
+|---|---|---|
+| **Setup** | `batho-setup` | One install targets 22 agents via per-agent mirrors |
+| **Explore** | `batho` | "Who calls this?", "what breaks if I change X?" — answered from graph queries, not grep |
+| **Specify** | `batho-specs` | Graph-grounded spec where every claim cites entities (`entity_id` + `file:line`) |
+| **Implement** | `batho-execute` | Blast-radius-first, dependency-ordered tasks; every edit starts from the symbol's current signature |
+| **Review** | `batho-review` | Per-criterion PASS/FAIL against the graph's change record — not raw diffs |
+
+### Why it matters
+
+- **Grounded answers** — structural questions resolved from the graph, not string search
+- **Blast radius first** — impact analysis before every change drives risk-tiered task plans
+- **Fresh by construction** — graph builds on first use, patches as you work, staleness-gated reads
+- **Supply-chain safe** — deterministic, checksummed, SLSA-attested release artifacts
 
 ---
 
 ## Contents
 
-[Why](#why-batho-skills) · [Install](#install) · [Quick start](#quick-start) · [The skill pack](#the-skill-pack) · [Supported agents](#supported-agents) · [Reference](#reference) · [Enterprise](#enterprise) · [Documentation](#documentation) · [Repo layout](#repo-layout) · [Contributing](#contributing) · [License](#license)
+- [Features](#features)
+- [Install](#install)
+- [Quick start](#quick-start)
+- [The skill pack](#the-skill-pack)
+- [Supported agents](#supported-agents)
+- [Reference](#reference)
+- [Enterprise](#enterprise)
+- [Documentation](#documentation)
+- [Repo layout](#repo-layout)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Install
 
-**Universal — one command, every agent:**
+**One command, every agent:**
 
 ```bash
 npx skills add sageoz/batho-skills
@@ -243,7 +274,6 @@ see [docs/enterprise.md](docs/enterprise.md).
 |---|---|
 | [docs/enterprise.md](docs/enterprise.md) | Managed rollout, air-gapped install, governance |
 | [docs/install.md](docs/install.md) | Install endpoints + installer design |
-| [docs/telemetry/README.md](docs/telemetry/README.md) | Telemetry service design |
 | [SECURITY.md](SECURITY.md) | Security & trust model |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 
